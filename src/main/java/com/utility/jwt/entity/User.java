@@ -8,7 +8,7 @@ import java.util.Set;
 public class User {
     @Id
     private String userName;
-    private String userFistName;
+    private String userFirstName;
     private String userLastName;
     private String userPassword;
 
@@ -31,12 +31,12 @@ public class User {
         this.userName = userName;
     }
 
-    public String getUserFistName() {
-        return userFistName;
+    public String getUserFirstName() {
+        return userFirstName;
     }
 
-    public void setUserFistName(String userFistName) {
-        this.userFistName = userFistName;
+    public void setUserFirstName(String userFirstName) {
+        this.userFirstName = userFirstName;
     }
 
     public String getUserLastName() {

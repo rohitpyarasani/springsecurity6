@@ -1,22 +1,17 @@
 package com.utility.jwt.util;
 
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.time.Instant;
 import java.util.function.Function;
 
-@Component
+@Service
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "validate_token_key"; // Use a strong key in production
     private static final int TOKEN_VALIDITY = 3600 * 5;
 
 
@@ -24,13 +19,13 @@ public class JwtUtil {
 
     private final JwtEncoder jwtEncoder;
 
+
     @Autowired
     public JwtUtil(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder) {
         this.jwtEncoder = jwtEncoder;
         this.jwtDecoder = jwtDecoder;
+
     }
-
-
     public String getUserNameFromToken(String token) {
         return getClaimFromToken(token, Jwt::getSubject);
     }
@@ -61,10 +56,12 @@ public class JwtUtil {
     public String generateToken(UserDetails userDetails) {
         JwtClaimsSet claimsSet = JwtClaimsSet.builder()
                 .subject(userDetails.getUsername())
+                .issuer("self")
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(TOKEN_VALIDITY))
                 .build();
 
-        return jwtEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
+        var encoderParameters = JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claimsSet);
+        return this.jwtEncoder.encode(encoderParameters).getTokenValue();
     }
 }

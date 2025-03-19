@@ -6,11 +6,11 @@ import com.utility.jwt.entity.JwtResponse;
 import com.utility.jwt.entity.User;
 import com.utility.jwt.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,14 +27,10 @@ public class JwtService implements UserDetailsService {
     private UserDao userDao;
     @Autowired
     private JwtUtil jwtUtil;
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
-    public JwtService(UserDao userDao, JwtUtil jwtUtil,@Lazy AuthenticationManager authenticationManager) {
-        this.userDao = userDao;
-        this.jwtUtil = jwtUtil;
-        this.authenticationManager = authenticationManager;
-    }
+    @Autowired
+    private AuthenticationConfiguration authenticationConfiguration;
+
 
     public JwtResponse createJwtToken(JwtRequest request) throws Exception {
         String userName = request.getUserName();
@@ -69,6 +65,7 @@ public class JwtService implements UserDetailsService {
 
     private void authenticate(String userName, String userPassword) throws Exception{
         try {
+            AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userName,userPassword));
         }catch (DisabledException ex){
             throw new Exception("User is disabled");
